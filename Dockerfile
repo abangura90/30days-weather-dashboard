@@ -1,17 +1,16 @@
-FROM python:3.11-alpine
-
-RUN apk add --no-cache \
-    gcc \
-    musl-dev \
-    python3-dev \
-    libffi-dev \
-    openssl-dev \
-    cargo \
-    aws-cli
+FROM python:3.11-slim
 
 WORKDIR /app
 
 COPY requirements.txt .
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    python3-dev \
+    libffi-dev \
+    libssl-dev \
+    awscli \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir -r requirements.txt
 

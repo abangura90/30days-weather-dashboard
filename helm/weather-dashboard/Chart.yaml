@@ -1,0 +1,5 @@
+apiVersion: v2
+name: weather-dashboard
+description: A Helm chart for Weather Dashboard
+version: 0.1.0
+type: application

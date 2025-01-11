@@ -1,0 +1,42 @@
+image:
+  repository: docker.io/abangura90/weather
+  tag: "1.2"
+  pullPolicy: Always
+
+env:
+  OPENWEATHER_API_KEY:
+    valueFrom:
+      secretKeyRef:
+        name: weather-dashboard-secrets
+        key: openweather-api-key
+  WEATHER_S3_BUCKET:
+    value: "***"
+  WEATHER_CITIES:
+    value: "Japan,Las Vegas,New York,London,Paris"
+
+# autoscaling:
+#   enabled: true
+#   minReplicas: 1
+#   maxReplicas: 3
+#   targetCPUUtilizationPercentage: 80
+#   # Uncomment to add memory-based autoscaling
+#   # targetMemoryUtilizationPercentage: 80
+
+aws:
+  accountId: "***"
+  iamRole: "weather-dashboard-role"
+  s3Bucket: "***"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+serviceAccount:
+  create: true
+  name: ""  # If not set, will use the release name
+
+namespace: weather-system
