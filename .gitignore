@@ -1,3 +1,68 @@
-.env
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Environment variables
+.env
+.env.*
+!.env.example
+.env-*
+*.env
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Testing
+.coverage
+coverage.xml
+*.cover
+.pytest_cache/
+htmlcov/
+
+# Logs
+*.log
+logs/
+
+# Local development settings
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database files
+*.db
+*.sqlite3
+
+# Documentation builds
+docs/_build/
+site/
+
+# Dependency management
+poetry.lock
+Pipfile.lock
+
+# Compressed files
 *.zip
+*.gz
+*.tar
+*.rar
+*.7z
