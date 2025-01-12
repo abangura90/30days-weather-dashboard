@@ -1,9 +1,27 @@
+# AWS dependencies
 boto3~=1.28.0
-requests~=2.31.0
 botocore~=1.31.0
+
+# HTTP and API
+requests~=2.31.0
+
+# Testing tools
 pytest>=7.0.0
 pytest-mock>=3.10.0
 pytest-cov>=4.0.0
 pytest-watch>=4.2.0
-black>=22.0.0  # for formatting
-flake8>=4.0.0  # for linting
+coverage>=7.0.0
+
+# Code quality tools
+black>=22.0.0
+flake8>=4.0.0
+
+# Application dependencies
+flask==2.3.3
+gunicorn==21.2.0
+python-dotenv==1.0.0
+
+# Data processing and visualization
+numpy==1.24.3  # Specific version to avoid compatibility issues
+pandas==2.0.3  # Earlier version for better compatibility
+plotly==5.16.1

@@ -1,0 +1,126 @@
+<!-- Style Switcher -->
+<div class="style-switcher">
+    <div class="dropdown">
+        <button class="style-btn" onclick="toggleStyleMenu()">
+            <span>Dashboard Style</span>
+            <svg class="chevron" viewBox="0 0 20 20" width="16" height="16">
+                <path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </button>
+        <div class="dropdown-menu" id="styleMenu">
+            <a href="{{ url_for('dashboard', style='classic', city=active_city) }}" 
+               class="dropdown-item {% if current_style == 'classic' %}active{% endif %}">
+                Classic
+            </a>
+            <a href="{{ url_for('dashboard', style='environmental', city=active_city) }}" 
+               class="dropdown-item {% if current_style == 'environmental' %}active{% endif %}">
+                Environmental
+            </a>
+            <a href="{{ url_for('dashboard', style='modern', city=active_city) }}" 
+               class="dropdown-item {% if current_style == 'modern' %}active{% endif %}">
+                Modern
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Style Switcher CSS -->
+<style>
+.style-switcher {
+    margin-right: 20px;
+    position: relative;
+}
+
+.style-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.style-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: #2d2d2d;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    min-width: 160px;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 8px 16px;
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item.active {
+    background: #4CAF50;
+    color: white;
+}
+
+.chevron {
+    transition: transform 0.2s;
+}
+
+.show .chevron {
+    transform: rotate(180deg);
+}
+</style>
+
+<!-- Style Switcher JavaScript -->
+<script>
+function toggleStyleMenu() {
+    const menu = document.getElementById('styleMenu');
+    const btn = document.querySelector('.style-btn');
+    menu.classList.toggle('show');
+    btn.classList.toggle('show');
+}
+
+// Close the dropdown when clicking outside
+window.onclick = function(event) {
+    if (!event.target.matches('.style-btn') && 
+        !event.target.matches('.style-btn *')) {
+        const dropdowns = document.getElementsByClassName('dropdown-menu');
+        const btns = document.getElementsByClassName('style-btn');
+        for (let dropdown of dropdowns) {
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        }
+        for (let btn of btns) {
+            if (btn.classList.contains('show')) {
+                btn.classList.remove('show');
+            }
+        }
+    }
+}
+</script>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modern Weather Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* Modern theme specific styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .nav-tabs {
+            display: inline-flex;
+            background: white;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #64748b;
+            border: none;
+            background: none;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: #0f172a;
+            background: #f1f5f9;
+        }
+
+        .nav-tab.active {
+            background: #0f172a;
+            color: white;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-panel {
+            grid-column: span 3;
+        }
+
+        .chart-panel {
+            grid-column: span 6;
+        }
+
+        .metrics-panel {
+            grid-column: span 12;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .metric-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            color: #0f172a;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .metric-trend {
+            color: #059669;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .refresh-button {
+            background: #0f172a;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .refresh-button:hover {
+            background: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .weather-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 1200px) {
+            .stats-panel, .chart-panel {
+                grid-column: span 6;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-panel, .chart-panel {
+                grid-column: span 12;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>Weather Analytics</h1>
+                {% include 'includes/style_switcher.html' %}
+            </div>
+            <div class="header-right">
+                <button onclick="refreshData()" class="refresh-button">Refresh</button>
+                <span class="last-updated">Updated: {{ last_updated }}</span>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            {% for city in cities %}
+            <button class="nav-tab {% if city == active_city %}active{% endif %}" 
+                    onclick="changeCity('{{ city }}')">{{ city }}</button>
+            {% endfor %}
+        </div>
+
+        {% for city_data in cities_data %}
+        {% if city_data.name == active_city %}
+        <div class="dashboard-grid">
+            <div class="panel stats-panel">
+                {{ city_data.modern_gauge | safe }}
+                <div class="metric-card">
+                    <div class="metric-label">Daily High/Low</div>
+                    <div class="metric-value">{{ city_data.metrics.temp_max }}° / {{ city_data.metrics.temp_min }}°</div>
+                </div>
+            </div>
+
+            <div class="panel chart-panel">
+                {{ city_data.forecast | safe }}
+            </div>
+
+            <div class="panel stats-panel">
+                {{ city_data.wind_compass | safe }}
+            </div>
+        </div>
+
+        <div class="panel metrics-panel">
+            <div class="metric-card">
+                <div class="metric-label">Humidity</div>
+                <div class="metric-value">{{ city_data.metrics.humidity }}%</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Pressure</div>
+                <div class="metric-value">{{ city_data.metrics.pressure }} hPa</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Visibility</div>
+                <div class="metric-value">{{ city_data.metrics.visibility }} km</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Cloud Cover</div>
+                <div class="metric-value">{{ city_data.metrics.clouds }}%</div>
+            </div>
+        </div>
+
+        <div class="weather-grid">
+            <div class="weather-card">
+                {{ city_data.weather_matrix | safe }}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <script>
+        function changeCity(city) {
+            window.location.href = `/?city=${encodeURIComponent(city)}&style=modern`;
+        }
+
+        function refreshData() {
+            $.ajax({
+                url: '/update_data',
+                success: function(data) {
+                    location.reload();
+                }
+            });
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(refreshData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

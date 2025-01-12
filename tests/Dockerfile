@@ -1,22 +1,25 @@
-FROM python:3.11-alpine
+FROM python:3.11-slim
 
-RUN apk add --no-cache \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     git \
-    gcc \
-    musl-dev \
+    build-essential \
     python3-dev \
-    libffi-dev \
-    openssl-dev \
-    cargo
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tests
 
-COPY requirements-qa.txt  .
+# Copy all necessary files
+COPY . .
+
+# Install Python packages
 RUN pip install --no-cache-dir -r requirements-qa.txt
 
+# Set environment variables
 ENV PYTHONPATH=/tests/src
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# Set entry point and default command
 ENTRYPOINT ["pytest"]
-CMD ["-v", "--cov=weather_dashboard", "--cov-report=term-missing"]
+CMD ["-v", "--cov=weather_collector", "--cov-report=term-missing", "--cov-config=.coveragerc"]

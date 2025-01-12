@@ -14,6 +14,11 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY src/weather_dashboard.py .
+# Copy the entire src directory
+COPY src /app/src
 
-CMD ["python", "weather_dashboard.py"]
+# Set the Python path
+ENV PYTHONPATH=/app
+
+# Use the new entry point script
+CMD ["python", "-m", "src.run_collector"]

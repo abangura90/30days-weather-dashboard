@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Weather Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>Weather Dashboard</h1>
+                {% include 'includes/style_switcher.html' %}
+            </div>
+            <div class="header-right">
+                <button class="refresh-button" onclick="refreshData()">Refresh Data</button>
+                <span class="last-updated">Last updated: {{ last_updated }}</span>
+            </div>
+        </div>
+
+        <!-- City Tabs -->
+        <div class="tabs">
+            {% for city_data in cities_data %}
+            <button class="tab-button {% if loop.first %}active{% endif %}" 
+                    onclick="showCity('{{ city_data.name }}')">
+                {{ city_data.name }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <!-- City Content -->
+        {% for city_data in cities_data %}
+        <div id="{{ city_data.name }}" class="city-content {% if not loop.first %}hidden{% endif %}">
+            <div class="chart-grid">
+                <!-- Modern Temperature Gauge -->
+                <div class="chart-container modern-gauge">
+                    {{ city_data.modern_gauge | safe }}
+                </div>
+                
+                <!-- Weather Matrix -->
+                <div class="chart-container matrix">
+                    {{ city_data.weather_matrix | safe }}
+                </div>
+            </div>
+            
+            <!-- Wind Compass -->
+            <div class="chart-grid">
+                <div class="chart-container">
+                    {{ city_data.wind_compass | safe }}
+                </div>
+                
+                <!-- Original Temperature Gauge -->
+                <div class="chart-container">
+                    {{ city_data.temp_gauge | safe }}
+                </div>
+            </div>
+            
+            <!-- Forecast Section -->
+            {% if city_data.forecast %}
+            <div class="chart-container forecast-container">
+                {{ city_data.forecast | safe }}
+            </div>
+            {% endif %}
+            
+            <!-- Dashboard -->
+            <div class="chart-container">
+                {{ city_data.dashboard | safe }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function showCity(cityName) {
+            // Hide all city content
+            document.querySelectorAll('.city-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            // Show selected city content
+            document.getElementById(cityName).classList.remove('hidden');
+            
+            // Update active tab
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.querySelector(`button[onclick="showCity('${cityName}')"]`).classList.add('active');
+        }
+
+        function refreshData() {
+            $.ajax({
+                url: '/update_data',
+                success: function(data) {
+                    // Update data for each city
+                    data.forEach(cityData => {
+                        const cityName = cityData.name;
+                        // Update charts
+                        ['temp-gauge', 'modern-gauge', 'wind-compass'].forEach(chartId => {
+                            const element = document.getElementById(`${chartId}-${cityName}`);
+                            if (element) {
+                                Plotly.animate(`${chartId}-${cityName}`, {
+                                    data: [{value: cityData.main.temp}],
+                                    layout: {}
+                                });
+                            }
+                        });
+                    });
+                    
+                    // Update last updated timestamp
+                    $('.last-updated').text('Last updated: ' + new Date().toLocaleString());
+                }
+            });
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(refreshData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

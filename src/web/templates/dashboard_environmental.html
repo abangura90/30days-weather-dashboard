@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Environmental Weather Monitor</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* Override specific styles for environmental theme */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        .header {
+            background: #2d2d2d;
+            border-radius: 15px;
+        }
+        
+        .nav-tabs {
+            background: #2d2d2d;
+            border-radius: 12px;
+            padding: 5px;
+        }
+        
+        .nav-tab {
+            background: transparent;
+            color: #ffffff;
+            border-radius: 8px;
+        }
+        
+        .nav-tab.active {
+            background: #4CAF50;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .panel {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .main-temp {
+            grid-column: span 4;
+        }
+        
+        .air-quality {
+            grid-column: span 4;
+        }
+        
+        .wind-data {
+            grid-column: span 4;
+        }
+        
+        .forecast {
+            grid-column: span 12;
+        }
+        
+        .environmental-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: #404040;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 10px 0;
+            color: #4CAF50;
+        }
+        
+        .metric-label {
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .refresh-button {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .refresh-button:hover {
+            background: #45a049;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .main-temp, .air-quality, .wind-data {
+                grid-column: span 6;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>Environmental Weather Monitor</h1>
+                {% include 'includes/style_switcher.html' %}
+            </div>
+            <div class="header-right">
+                <button onclick="refreshData()" class="refresh-button">Refresh</button>
+                <span class="last-updated">Updated: {{ last_updated }}</span>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            {% for city in cities %}
+            <button class="nav-tab {% if city == active_city %}active{% endif %}" 
+                    onclick="changeCity('{{ city }}')">{{ city }}</button>
+            {% endfor %}
+        </div>
+
+        {% for city_data in cities_data %}
+        {% if city_data.name == active_city %}
+        <div class="dashboard-grid">
+            <div class="panel main-temp">
+                {{ city_data.temp_distribution | safe }}
+                <div class="environmental-metrics">
+                    <div class="metric-card">
+                        <div class="metric-label">Ground Level Pressure</div>
+                        <div class="metric-value">{{ city_data.metrics.grnd_level }} hPa</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Sea Level Pressure</div>
+                        <div class="metric-value">{{ city_data.metrics.sea_level }} hPa</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel air-quality">
+                {{ city_data.air_quality_gauge | safe }}
+                <div class="environmental-metrics">
+                    <div class="metric-card">
+                        <div class="metric-label">Visibility</div>
+                        <div class="metric-value">{{ city_data.metrics.visibility }} km</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Cloud Cover</div>
+                        <div class="metric-value">{{ city_data.metrics.clouds }}%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel wind-data">
+                {{ city_data.wind_analysis | safe }}
+            </div>
+            
+            <div class="panel forecast">
+                {{ city_data.environmental_trends | safe }}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <script>
+        function changeCity(city) {
+            window.location.href = `/?city=${encodeURIComponent(city)}&style=environmental`;
+        }
+
+        function refreshData() {
+            $.ajax({
+                url: '/update_data',
+                success: function(data) {
+                    location.reload();
+                }
+            });
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(refreshData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

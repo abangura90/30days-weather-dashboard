@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error - Weather Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="error-container">
+        <h1 class="error-title">Error</h1>
+        <p class="error-message">{{ error }}</p>
+        <a href="/" class="refresh-button">Retry</a>
+    </div>
+</body>
+</html>
